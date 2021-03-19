@@ -1,0 +1,27 @@
+{
+  "name": "user-manger-back",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [
+    "user-manager"
+  ],
+  "author": "Klimarchuk Taras <klimarcuktaras@gmail.com>",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "prettier": "^2.2.1"
+  }
+}
