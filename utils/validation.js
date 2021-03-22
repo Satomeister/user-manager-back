@@ -2,6 +2,14 @@ const { body } = require("express-validator");
 
 module.exports = {
   register: [
+    body("fullName")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter a fullname")
+      .isLength({ min: 6 })
+      .withMessage("FullName must be at lease 6 characters")
+      .isLength({ max: 70 })
+      .withMessage("FullName must be less than 70 characters"),
     body("email")
       .not()
       .isEmpty()

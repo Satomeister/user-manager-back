@@ -16,6 +16,7 @@ class UserController {
       }
 
       const data = {
+        fullName: req.body.fullName,
         email: req.body.email,
         password: req.body.password,
         isAdmin: req.body.isAdmin,
@@ -69,7 +70,7 @@ class UserController {
       return res.json({
         status: "success",
         data: {
-          ...userData,
+          user: userData,
           token: jwt.sign({ data: user }, `'${process.env.JWT_SECRET}'`, {
             expiresIn: "30d",
           }),
@@ -116,6 +117,10 @@ class UserController {
       }
 
       const user = await UserModel.findById(req.params.userId);
+
+      await ProfileModel.deleteMany({
+        _id: { $in: user.profiles },
+      });
 
       if (!user || user._id.toString() === req.user._id.toString()) {
         return res.status(500).json({
