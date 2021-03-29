@@ -3,13 +3,14 @@ const { Schema, model } = require("mongoose");
 
 const UserSchema = new Schema(
   {
-    fullName: {
+    fullname: {
       type: String,
       required: true,
     },
     email: {
       type: String,
       required: true,
+      lowercase: true,
     },
     password: {
       type: String,
@@ -22,8 +23,13 @@ const UserSchema = new Schema(
     profiles: [
       {
         type: Schema.Types.ObjectId,
+        ref: "profile",
       },
     ],
+    profilesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

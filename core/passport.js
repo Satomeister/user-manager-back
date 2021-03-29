@@ -10,7 +10,11 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await UserModel.findOne({ email })
-          .populate("profiles")
+          .populate({
+            path: "profiles",
+            options: { sort: { createdAt: -1 }, orderBy: -1 },
+            limit: +process.env.PAGE_SIZE,
+          })
           .exec();
 
         if (!user) {
@@ -39,8 +43,12 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        const user = await UserModel.findById(payload.data._id)
-          .populate("profiles")
+        const user = await UserModel.findById(payload.userId)
+          .populate({
+            path: "profiles",
+            options: { sort: { createdAt: -1 }, orderBy: -1 },
+            limit: process.env.PAGE_SIZE,
+          })
           .exec();
 
         if (!user) {

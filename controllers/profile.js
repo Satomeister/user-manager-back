@@ -13,14 +13,11 @@ class ProfileController {
           message: errorsData.errors[0].msg,
         });
       }
-
-      const dateParts = req.body.birthdate.split("/");
-
       const data = {
-        owner: req.user,
+        owner: req.user._id,
         name: req.body.name,
         gender: req.body.gender,
-        birthdate: new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]),
+        birthdate: req.body.birthdate,
         city: req.body.city,
       };
 
@@ -41,6 +38,7 @@ class ProfileController {
       const user = await UserModel.findById(data.owner);
 
       user.profiles.push(profile);
+      user.profilesCount += 1;
 
       await user.save();
 
@@ -53,7 +51,47 @@ class ProfileController {
         data: profile,
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      res.status(500).json({
+        status: "error",
+        error,
+      });
+    }
+  }
+
+  async getNewChunk(req, res) {
+    try {
+      let user;
+
+      if (req.user.isAdmin) {
+        user = await UserModel.findById(req.params.userId).populate({
+          path: "profiles",
+          options: { sort: { createdAt: -1 }, orderBy: -1 },
+          skip: (+req.query.page - 1) * process.env.PAGE_SIZE,
+          limit: +process.env.PAGE_SIZE,
+        });
+      } else {
+        user = await UserModel.findById(req.params.userId).populate({
+          path: "profiles",
+          options: { sort: { createdAt: -1 }, orderBy: -1 },
+          skip: (+req.query.page - 1) * process.env.PAGE_SIZE,
+          limit: +process.env.PAGE_SIZE,
+        });
+      }
+
+      if (!user) {
+        return res.status(400).json({
+          status: "error",
+          message: "User was not fount",
+        });
+      }
+
+      res.json({
+        status: "success",
+        data: user.profiles,
+      });
+    } catch (error) {
+      console.log(error);
       res.status(500).json({
         status: "error",
         error,
@@ -72,13 +110,10 @@ class ProfileController {
         });
       }
 
-      const dateParts = req.body.birthdate.split("/");
-
       const data = {
-        owner: req.user,
         name: req.body.name,
         gender: req.body.gender,
-        birthdate: new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]),
+        birthdate: req.body.birthdate,
         city: req.body.city,
       };
 
@@ -99,7 +134,7 @@ class ProfileController {
       }
 
       if (!profile) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: "error",
           message: "Profile was not found",
         });
@@ -119,23 +154,21 @@ class ProfileController {
 
   async delete(req, res) {
     try {
-      const data = {
-        profileId: req.params.profileId,
-      };
-
       let profile;
 
       if (req.user.isAdmin) {
-        profile = await ProfileModel.findOneAndDelete({ _id: data.profileId });
+        profile = await ProfileModel.findOneAndDelete({
+          _id: req.params.profileId,
+        });
       } else {
         profile = await ProfileModel.findOneAndDelete({
-          _id: data.profileId,
+          _id: req.params.profileId,
           owner: req.user,
         });
       }
 
       if (!profile) {
-        return res.status(400).json({
+        return res.status(404).json({
           status: "error",
           message: "Profile was not found",
         });
@@ -147,11 +180,14 @@ class ProfileController {
         return res.status(400).send();
       }
 
-      owner.profiles = owner.profiles.filter((id) => id.toString() !== profile._id.toString());
+      owner.profiles = owner.profiles.filter(
+        (id) => id.toString() !== profile._id.toString()
+      );
+      owner.profilesCount -= 1;
 
       await owner.save();
 
-      res.json({ status: "success" });
+      res.status(204).json({ status: "success" });
     } catch (error) {
       res.status(500).json({
         status: "error",

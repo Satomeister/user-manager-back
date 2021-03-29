@@ -5,8 +5,29 @@ const { profile: profileValidation } = require("../utils/validation");
 
 const route = Router();
 
-route.post("/", passport.authenticate("jwt"), profileValidation, profileController.create);
-route.delete('/:profileId', passport.authenticate('jwt'), profileController.delete)
-route.put('/edit/:profileId', passport.authenticate('jwt'), profileController.edit)
+route.post(
+  "/",
+  passport.authenticate("jwt"),
+  profileValidation,
+  profileController.create
+);
+
+route.get(
+  "/:userId",
+  passport.authenticate("jwt"),
+  profileController.getNewChunk
+);
+
+route.delete(
+  "/:profileId",
+  passport.authenticate("jwt"),
+  profileController.delete
+);
+
+route.put(
+  "/edit/:profileId",
+  passport.authenticate("jwt"),
+  profileController.edit
+);
 
 module.exports = route;

@@ -2,12 +2,12 @@ const { body } = require("express-validator");
 
 module.exports = {
   register: [
-    body("fullName")
+    body("fullname")
       .not()
       .isEmpty()
       .withMessage("Please enter a fullname")
-      .isLength({ min: 6 })
-      .withMessage("FullName must be at lease 6 characters")
+      .isLength({ min: 3 })
+      .withMessage("Full name must be at lease 3 characters")
       .isLength({ max: 70 })
       .withMessage("FullName must be less than 70 characters"),
     body("email")
@@ -44,7 +44,12 @@ module.exports = {
       .not()
       .isEmpty()
       .withMessage("Please enter a birthdate")
-      .matches(/^(0?[1-9]|[12][0-9]|3[01])[\/](0?[1-9]|1[012])[\/\-]\d{4}$/)
-      .withMessage("Birthdate is invalid"),
+      .custom((value) => {
+        if (new Date(value) instanceof Date) {
+          return true;
+        } else {
+          throw new Error("Birthdate is invalid");
+        }
+      }),
   ],
 };
